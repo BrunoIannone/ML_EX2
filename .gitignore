@@ -1,3 +1,4 @@
 Data/
 .git/
-
+__pycache__/
+play_policy_template.py
