@@ -25,6 +25,7 @@ class WSD(pl.LightningModule):
     
     """
         super().__init__()
+        self.num_labels = num_labels
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -76,10 +77,10 @@ class WSD(pl.LightningModule):
         return optimizer
     
     def training_step(self,train_batch,batch_idx):
-        image,label = train_batch
-        outputs = self(**train_batch)
+        image,labels = train_batch
+        outputs = self(image)
         
-        loss = F.cross_entropy(outputs.view(-1, self.num_labels),train_batch["labels"].view(-1),ignore_index=-100)
+        loss = F.cross_entropy(outputs.view(-1, self.num_labels),labels,ignore_index=-100)
         
         self.log_dict({'train_loss':loss},on_epoch=True, batch_size=utils.BATCH_SIZE,on_step=False,prog_bar=True)
         
@@ -87,12 +88,12 @@ class WSD(pl.LightningModule):
         
 
     def validation_step(self, val_batch,idx):
-        
-        outputs = self(**val_batch)
+        image, labels = val_batch
+        outputs = self(image)
         y_pred = outputs.argmax(dim = 1)
        
        
-        loss = F.cross_entropy(outputs.view(-1, self.num_labels),val_batch["labels"].view(-1),ignore_index=-100)
+        loss = F.cross_entropy(outputs.view(-1, self.num_labels),labels,ignore_index=-100)
         
         self.val_metric(y_pred,val_batch["labels"])
         self.log_dict({'val_loss':loss,'valid_f1': self.val_metric},batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)
