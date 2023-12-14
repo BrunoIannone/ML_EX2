@@ -5,20 +5,20 @@ from torchvision.io import read_image
 from typing import List
 import time
 import os
-class Dataset(Dataset):
-    """WSD dataset class
+class CarActionDataset(Dataset):
+    """Car action dataset class
     """
-    def __init__(self, samples: List, labels: List[int]):
-        """Constructor for the WSD dataset
+    def __init__(self, samples: List[tuple]):
+        """Constructor for car action dataset
 
         Args:
-            samples (List): List of images
-            labels(List[int]): List of int with movement labels 
+            samples (List[tuple]): List of tuples (image_path, action_label)
+            
         """
         
         self.samples = samples 
         
-        self.labels = labels
+        
         
         
     
@@ -39,7 +39,7 @@ class Dataset(Dataset):
             index (int): index-th sample to access
 
         Returns:
-            tuple: (samples, labels) related to the index-th element 
+            tuple: (image, labels) open image_path and return the tuple (image,label) related to the index-th element 
         """
         
         #convert index-th sample senses in indices

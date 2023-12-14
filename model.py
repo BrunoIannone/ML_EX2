@@ -76,7 +76,7 @@ class WSD(pl.LightningModule):
         return optimizer
     
     def training_step(self,train_batch,batch_idx):
-
+        image,label = train_batch
         outputs = self(**train_batch)
         
         loss = F.cross_entropy(outputs.view(-1, self.num_labels),train_batch["labels"].view(-1),ignore_index=-100)
