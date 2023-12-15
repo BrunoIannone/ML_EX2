@@ -9,23 +9,21 @@ import time
 import torchmetrics
 import utils
 
-class WSD(pl.LightningModule): 
-    def __init__(self, language_model_name: str, num_labels: int,fine_tune_lm: bool = True,lin_lr: float = 0.0, backbone_lr: float = 0.0,lin_wd: float = 0.0, backbone_wd: float = 0.0, lin_dropout: float = 0.0 ,*args, **kwargs) -> None:
-        """WSD init function for transformer-based models
+class CarActionModel(pl.LightningModule): 
+    def __init__(self,  number_actions: int,lin_lr: float = 0.0, cnn_lr: float = 0.0,lin_wd: float = 0.0, cnn_wd: float = 0.0, lin_dropout: float = 0.0, cnn_dropout:float = 0.0) -> None:
+        """Car action model init function
 
-    Args:
-        language_model_name (str): Transformer Hugging Face model name
-        num_labels (int): Number of total labels 
-        fine_tune_lm (bool, optional): If false, transformer parameters won't be updated. Defaults to True.
-        lin_lr (float, optional): Linear layer learning rate. Defaults to 0.0.
-        backbone_lr (float, optional): Transformer learning rate. Defaults to 0.0.
-        lin_wd (float, optional): Linear layer weight decay. Defaults to 0.0.
-        backbone_wd (float, optional): Transformer weight decay. Defaults to 0.0.
-        lin_dropout (float, optional): Linear layer dropout. Defaults to 0.0.
-    
-    """
+        Args:
+            number_actions (int): Number of actions
+            lin_lr (float, optional): Linear layer learning rate. Defaults to 0.0.
+            cnn_lr (float, optional): CNN learning rate. Defaults to 0.0.
+            lin_wd (float, optional): Linear layer weight decay. Defaults to 0.0.
+            cnn_wd (float, optional): CNN weight decay. Defaults to 0.0.
+            lin_dropout (float, optional): Linear layer dropout . Defaults to 0.0.
+            cnn_dropout (float, optional): CNN dropout. Defaults to 0.0.
+        """
         super().__init__()
-        self.num_labels = num_labels
+        self.number_actions = number_actions
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -39,12 +37,10 @@ class WSD(pl.LightningModule):
         self.fc2 = nn.Linear(128, 10)  # 10 output classes for digits 0-9
 
         
-        if not fine_tune_lm:
-            for param in self.parameters():
-                param.requires_grad = False
         
-        self.val_metric  = torchmetrics.F1Score(task="multiclass", num_classes=num_labels, average='micro')
-        self.test_metric = torchmetrics.F1Score(task="multiclass", num_classes=num_labels, average='micro')
+        
+        self.val_metric  = torchmetrics.F1Score(task="multiclass", num_classes=number_actions, average='micro')
+        self.test_metric = torchmetrics.F1Score(task="multiclass", num_classes=number_actions, average='micro')
 
         self.save_hyperparameters()
 
@@ -80,7 +76,7 @@ class WSD(pl.LightningModule):
         image,labels = train_batch
         outputs = self(image)
         
-        loss = F.cross_entropy(outputs.view(-1, self.num_labels),labels,ignore_index=-100)
+        loss = F.cross_entropy(outputs.view(-1, self.number_actions),labels,ignore_index=-100)
         
         self.log_dict({'train_loss':loss},on_epoch=True, batch_size=utils.BATCH_SIZE,on_step=False,prog_bar=True)
         
@@ -93,7 +89,7 @@ class WSD(pl.LightningModule):
         y_pred = outputs.argmax(dim = 1)
        
        
-        loss = F.cross_entropy(outputs.view(-1, self.num_labels),labels,ignore_index=-100)
+        loss = F.cross_entropy(outputs.view(-1, self.number_actions),labels,ignore_index=-100)
         
         self.val_metric(y_pred,val_batch["labels"])
         self.log_dict({'val_loss':loss,'valid_f1': self.val_metric},batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)
@@ -104,7 +100,7 @@ class WSD(pl.LightningModule):
         outputs = self(**test_batch)
         y_pred = outputs.argmax(dim = 1)
         
-        loss = F.cross_entropy(outputs.view(-1, self.num_labels),test_batch["labels"].view(-1),ignore_index=-100)
+        loss = F.cross_entropy(outputs.view(-1, self.number_actions),test_batch["labels"].view(-1),ignore_index=-100)
 
         self.test_metric(y_pred,test_batch["labels"])
         self.log_dict({'test_loss':loss,'test_f1': self.test_metric},batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)

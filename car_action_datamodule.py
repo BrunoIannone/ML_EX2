@@ -1,6 +1,6 @@
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
-import car_dataset_action
+import car_action_dataset
 import utils
 
 class CarActionDataModule(LightningDataModule):
@@ -25,9 +25,9 @@ class CarActionDataModule(LightningDataModule):
 
     def setup(self, stage: str):
         
-        self.train_dataset = car_dataset_action.CarActionDataset(self.training_data)
-        self.valid_dataset = car_dataset_action.CarActionDataset(self.valid_data)
-        self.test_dataset = car_dataset_action.CarActionDataset(self.test_data)
+        self.train_dataset = car_action_dataset.CarActionDataset(self.training_data)
+        self.valid_dataset = car_action_dataset.CarActionDataset(self.valid_data)
+        self.test_dataset = car_action_dataset.CarActionDataset(self.test_data)
 
     def train_dataloader(self):
         
