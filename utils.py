@@ -2,20 +2,21 @@ import os
 from termcolor import colored
 from pathlib import Path
 import csv
-DATA_FOLDER = os.path.dirname(__file__) 
+ROOT_FOOLDER = Path(os.path.dirname(__file__))
 TRAINING_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/train"))
-
+LOG_SAVE_DIR_NAME = ROOT_FOOLDER/"Saves/logs"
+CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt"
 TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/test"))
 
 
-BATCH_SIZE = 16
-NUM_WORKERS = 12
-LEARNING_RATE = [1e-2,1e-3]
-LEARNING_RATE2 = [1e-2,1e-3]
-weight_decay = [0,0.001,0.01]
-transformer_learning_rate = [1e-5]
-transformer_weight_decay = [0,0.001,0.1]
-LIN_DROPOUT = [0.5,0.8]
+BATCH_SIZE = 512
+NUM_WORKERS =7
+LEARNING_RATE = [1e-2]
+LEARNING_RATE2 = [1e-2]
+weight_decay = [0.01]
+transformer_learning_rate = [1e-2]
+transformer_weight_decay = [0.01]
+LIN_DROPOUT = [0.5]
 NUM_EPOCHS = 100
 
 

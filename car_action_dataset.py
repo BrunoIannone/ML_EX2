@@ -1,10 +1,12 @@
 from torch.utils.data import Dataset
 #import stud.transformer_utils as transformer_utils
 from torchvision.io import read_image
-
+from termcolor import colored
 from typing import List
 import time
 import os
+from torchvision import transforms
+
 class CarActionDataset(Dataset):
     """Car action dataset class
     """
@@ -18,7 +20,7 @@ class CarActionDataset(Dataset):
         
         self.samples = samples 
         
-        
+        #print(self.samples)
         
         
     
@@ -43,15 +45,20 @@ class CarActionDataset(Dataset):
         """
         
         #convert index-th sample senses in indices
-        
-        image = read_image(self.samples[index][0])
-        
+        #print(colored(self.samples[0],"red"))
+        transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((96, 96)),
+            transforms.ToTensor(),
+        ])
+        image = transform(read_image(self.samples[index][0]))
+        #print(colored(image.shape,"yellow"))
         # if self.transform:
         #     image = self.transform(image)
         # if self.target_transform:
         #     label = self.target_transform(label)
         
-            
-        return image, self.labels[index][1]
+        
+        return image, self.samples[index][1]
     
         

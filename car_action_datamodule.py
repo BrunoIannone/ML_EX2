@@ -8,7 +8,7 @@ class CarActionDataModule(LightningDataModule):
 
     
     """
-    def __init__(self,training_data:dict, valid_data:dict, test_data:dict,labels_to_idx:dict):
+    def __init__(self,training_data:dict, valid_data:dict, test_data:dict):
         """Init function for car action datamodule
 
         Args:
@@ -36,7 +36,7 @@ class CarActionDataModule(LightningDataModule):
             batch_size = utils.BATCH_SIZE,
             num_workers = utils.NUM_WORKERS,
             shuffle = False,
-            collate_fn=utils.collate_fn
+            #collate_fn=utils.collate_fn
         ) 
     def val_dataloader(self):
         return DataLoader(
@@ -44,7 +44,7 @@ class CarActionDataModule(LightningDataModule):
             batch_size = utils.BATCH_SIZE,
             num_workers = utils.NUM_WORKERS,
             shuffle = False,
-            collate_fn=utils.collate_fn
+            #collate_fn=utils.collate_fn
         )
     def test_dataloader(self):
         return DataLoader(
@@ -52,5 +52,5 @@ class CarActionDataModule(LightningDataModule):
             batch_size = utils.BATCH_SIZE,
             num_workers = utils.NUM_WORKERS,
             shuffle = False,
-            collate_fn=utils.collate_fn
+            #collate_fn=utils.collate_fn
         )
