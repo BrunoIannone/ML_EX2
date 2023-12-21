@@ -8,18 +8,20 @@ import pytorch_lightning as pl
 import time
 import torchmetrics
 import utils
+from torchvision import transforms
+import numpy as np
 
 class CarActionModel(pl.LightningModule): 
-    def __init__(self,  number_actions: int,lin_lr: float = 0.0, cnn_lr: float = 0.0,lin_wd: float = 0.0, cnn_wd: float = 0.0, lin_dropout: float = 0.0, cnn_dropout:float = 0.0) -> None:
+    def __init__(self,  number_actions: int,fc_lr: float = 0.0, cnn_lr: float = 0.0,fc_wd: float = 0.0, cnn_wd: float = 0.0, fc_dropout: float = 0.0, cnn_dropout:float = 0.0) -> None:
         """Car action model init function
 
         Args:
             number_actions (int): Number of actions
-            lin_lr (float, optional): Linear layer learning rate. Defaults to 0.0.
+            fc_lr (float, optional): Linear layer learning rate. Defaults to 0.0.
             cnn_lr (float, optional): CNN learning rate. Defaults to 0.0.
-            lin_wd (float, optional): Linear layer weight decay. Defaults to 0.0.
+            fc_wd (float, optional): Linear layer weight decay. Defaults to 0.0.
             cnn_wd (float, optional): CNN weight decay. Defaults to 0.0.
-            lin_dropout (float, optional): Linear layer dropout . Defaults to 0.0.
+            fc_dropout (float, optional): Linear layer dropout . Defaults to 0.0.
             cnn_dropout (float, optional): CNN dropout. Defaults to 0.0.
         """
         super().__init__()
@@ -38,8 +40,10 @@ class CarActionModel(pl.LightningModule):
         self.fc2 = nn.Linear(128, number_actions)  # Adjust output size for 5 classes
 
         
-        self.lin_lr = lin_lr
-        self.lin_wd = lin_wd
+        self.fc_lr = fc_lr
+        self.fc_wd = fc_wd
+        self.cnn_lr = cnn_lr
+        self.cnn_wd = cnn_wd
         
         self.val_metric  = torchmetrics.F1Score(task="multiclass", num_classes=number_actions, average='micro')
         self.test_metric = torchmetrics.F1Score(task="multiclass", num_classes=number_actions, average='micro')
@@ -50,15 +54,15 @@ class CarActionModel(pl.LightningModule):
         x = self.conv1(x)
         x = self.relu1(x)
         x = self.pool1(x)
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.conv2(x)
         x = self.relu2(x)
         x = self.pool2(x)
         x = x.view(x.size(0), -1)
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.fc1(x)
         x = self.relu3(x)
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.fc2(x)
 
         return x
@@ -69,27 +73,27 @@ class CarActionModel(pl.LightningModule):
         groups = [
           {
                "params": self.conv1.parameters(),
-               "lr": self.lin_lr,
-               "weight_decay": self.lin_wd,
+               "lr": self.cnn_lr,
+               "weight_decay": self.fc_wd,
             },
             {
                "params": self.conv2.parameters(),
-               "lr": self.lin_lr,
-               "weight_decay": self.lin_wd,
+               "lr": self.cnn_lr,
+               "weight_decay": self.fc_wd,
             },
            {
                "params": self.fc1.parameters(),
-               "lr": self.lin_lr,
-               "weight_decay": self.lin_wd,
+               "lr": self.fc_lr,
+               "weight_decay": self.fc_wd,
             },
             {
                "params": self.fc2.parameters(),
-               "lr": self.lin_lr,
-               "weight_decay": self.lin_wd,
+               "lr": self.fc_lr,
+               "weight_decay": self.fc_wd,
             }
         ]           
         
-        optimizer = torch.optim.AdamW(self.parameters())
+        optimizer = torch.optim.Adam(self.parameters())
                
         return optimizer
     
@@ -127,3 +131,16 @@ class CarActionModel(pl.LightningModule):
         self.test_metric(y_pred,labels)
         self.log_dict({'test_loss':loss,'test_f1': self.test_metric},batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)
                       
+    def predict(self,to_predict):
+        transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Resize((96, 96)),
+            transforms.ToTensor(),
+        ])
+        to_predict = transform(to_predict).unsqueeze(0)
+        p = self(to_predict)
+        print(np.argmax(p.detach()))
+
+        action = int(np.argmax(p.detach()))  # adapt to your model
+        return action
+        #print("ACTION", action)

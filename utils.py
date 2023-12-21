@@ -4,20 +4,24 @@ from pathlib import Path
 import csv
 ROOT_FOOLDER = Path(os.path.dirname(__file__))
 TRAINING_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/train"))
-LOG_SAVE_DIR_NAME = ROOT_FOOLDER/"Saves/logs"
-CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt"
+LOG_SAVE_DIR_NAME = ROOT_FOOLDER/"Saves/logs/"
+CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt/"
 TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/test"))
 
 
-BATCH_SIZE = 512
-NUM_WORKERS =7
-LEARNING_RATE = [1e-2]
-LEARNING_RATE2 = [1e-2]
-weight_decay = [0.01]
-transformer_learning_rate = [1e-2]
-transformer_weight_decay = [0.01]
-LIN_DROPOUT = [0.5]
 NUM_EPOCHS = 100
+NUM_WORKERS =7
+BATCH_SIZE = 512
+
+FC_LR = [1e-2]
+CNN_LR = [1e-2]
+
+CNN_WD = [0]
+FC_WD = [0]
+
+CNN_DROPOUT = [0.5]
+FC_DROPOUT = [0.5]
+
 
 
 def build_couples(dir):  # training_folder, eval_folder, test_folder):
