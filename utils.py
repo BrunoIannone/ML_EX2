@@ -10,8 +10,8 @@ TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/test")
 
 
 NUM_EPOCHS = 100
-NUM_WORKERS =7
-BATCH_SIZE = 512
+NUM_WORKERS = 11
+BATCH_SIZE = 1024
 
 FC_LR = [1e-2]
 CNN_LR = [1e-2]

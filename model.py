@@ -135,11 +135,11 @@ class CarActionModel(pl.LightningModule):
         transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((96, 96)),
-            transforms.ToTensor(),
+            transforms.ToTensor()
         ])
         to_predict = transform(to_predict).unsqueeze(0)
         p = self(to_predict)
-        print(np.argmax(p.detach()))
+        #print(np.argmax(p.detach()))
 
         action = int(np.argmax(p.detach()))  # adapt to your model
         return action

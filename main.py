@@ -34,7 +34,7 @@ for hyperparameter in tqdm.tqdm(hyp_comb,colour="yellow", desc="Tried combinatio
     print(colored("Built coarse data","green"))
 
     logger = TensorBoardLogger(save_dir=str(utils.LOG_SAVE_DIR_NAME),name= str(fc_lr) + ", " + str(fc_wd) + ", " + str(fc_dropout)+ ", " + str(cnn_lr)+ ", " + str(cnn_wd) + ", " + str(cnn_dropout))
-    trainer = pl.Trainer(log_every_n_steps=50,max_epochs = utils.NUM_EPOCHS,callbacks=[EarlyStopping(monitor="val_loss", patience=5,mode='min'), ModelCheckpoint(filename= str(fc_lr) + ", " + str(fc_wd) + ", " + str(fc_dropout)+ ", " + str(cnn_lr)+ ", " + str(cnn_wd) + ", " + str(cnn_dropout),monitor='valid_f1',save_top_k=1,every_n_epochs=1,mode='max',save_weights_only=False,verbose=True,dirpath=utils.CKPT_SAVE_DIR_NAME)],logger=logger,accelerator='gpu')
+    trainer = pl.Trainer(log_every_n_steps=5,max_epochs = utils.NUM_EPOCHS,callbacks=[EarlyStopping(monitor="val_loss", patience=5,mode='min'), ModelCheckpoint(filename= str(fc_lr) + ", " + str(fc_wd) + ", " + str(fc_dropout)+ ", " + str(cnn_lr)+ ", " + str(cnn_wd) + ", " + str(cnn_dropout),monitor='valid_f1',save_top_k=1,every_n_epochs=1,mode='max',save_weights_only=False,verbose=True,dirpath=utils.CKPT_SAVE_DIR_NAME)],logger=logger,accelerator='gpu')
     #print(list(zip(data_processor.x_train,data_processor.y_train)))
     print(colored("Built logger and trainer","green"))
     car_action_datamodule = CarActionDataModule(list(zip(data_processor.x_train,data_processor.y_train)),list(zip(data_processor.x_eval,data_processor.y_eval)),list(zip(data_processor.test_samples,data_processor.test_labels)))
