@@ -2,6 +2,8 @@ import os
 from termcolor import colored
 from pathlib import Path
 import csv
+import torch
+
 ROOT_FOOLDER = Path(os.path.dirname(__file__))
 TRAINING_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/train"))
 LOG_SAVE_DIR_NAME = ROOT_FOOLDER/"Saves/logs/"
@@ -22,7 +24,7 @@ FC_WD = [0]
 CNN_DROPOUT = [0.5]
 FC_DROPOUT = [0.5]
 
-
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def build_couples(dir):  # training_folder, eval_folder, test_folder):
     # Implement your logic to build front and rear couples here

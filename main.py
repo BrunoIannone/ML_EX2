@@ -38,7 +38,7 @@ for hyperparameter in tqdm.tqdm(hyp_comb,colour="yellow", desc="Tried combinatio
     #print(list(zip(data_processor.x_train,data_processor.y_train)))
     print(colored("Built logger and trainer","green"))
     car_action_datamodule = CarActionDataModule(list(zip(data_processor.x_train,data_processor.y_train)),list(zip(data_processor.x_eval,data_processor.y_eval)),list(zip(data_processor.test_samples,data_processor.test_labels)))
-    print(colored(len(data_processor.labels_name),"red"))
+    #print(colored(len(data_processor.labels_name),"red"))
     car_action_model = CarActionModel(len(data_processor.labels_name),fc_lr,cnn_lr,fc_wd,cnn_wd,fc_dropout,cnn_dropout)
     print(colored("Starting transformer coarse training...","green"))
     trainer.fit(car_action_model,datamodule = car_action_datamodule)

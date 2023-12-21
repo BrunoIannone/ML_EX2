@@ -137,10 +137,12 @@ class CarActionModel(pl.LightningModule):
             transforms.Resize((96, 96)),
             transforms.ToTensor()
         ])
-        to_predict = transform(to_predict).unsqueeze(0)
+        to_predict = transform(to_predict).unsqueeze(0).cuda()
+        
         p = self(to_predict)
         #print(np.argmax(p.detach()))
 
-        action = int(np.argmax(p.detach()))  # adapt to your model
-        return action
+        #action = int(np.argmax(p.detach()))  # adapt to your model
+        _,action = torch.max(p,1)
+        return int(action)
         #print("ACTION", action)

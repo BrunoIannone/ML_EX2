@@ -27,6 +27,7 @@ def play(env, model):
     
     done = False
     while not done:
+        
         p = model.predict(obs) # adapt to your model     
         obs, _, terminated, truncated, _ = env.step(p)
         #print("TRUNCATED",terminated)
@@ -50,7 +51,7 @@ print("Action space:", env.action_space)
 print("Observation space:", env.observation_space)
 
 # your trained
-model = CarActionModel.load_from_checkpoint(os.path.join(utils.CKPT_SAVE_DIR_NAME,"0.01, 0, 0.5, 0.01, 0, 0.5.ckpt"), map_location='cpu') # your trained model
+model = CarActionModel.load_from_checkpoint(os.path.join(utils.CKPT_SAVE_DIR_NAME,"0.01, 0, 0.5, 0.01, 0, 0.5.ckpt")) # your trained model
 model.eval()
 play(env, model)
 
