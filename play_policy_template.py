@@ -51,7 +51,11 @@ print("Action space:", env.action_space)
 print("Observation space:", env.observation_space)
 
 # your trained
-model = CarActionModel.load_from_checkpoint(os.path.join(utils.CKPT_SAVE_DIR_NAME,"0.01, 0, 0.5, 0.01, 0, 0.5.ckpt")) # your trained model
+path = None
+with open("last_ckpt.txt","r") as f:
+        path = f.readline()
+        path = f.readline().strip()
+model = CarActionModel.load_from_checkpoint(path,map_location=utils.DEVICE) # your trained model
 model.eval()
 play(env, model)
 

@@ -1,0 +1,2 @@
+v = 0
+/home/bruno/Desktop/ML_EX2/Saves/ckpt/0.001, 0.1, 0.2, 0.0001, 0.1, 0.2.ckpt

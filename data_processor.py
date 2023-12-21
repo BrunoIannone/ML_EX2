@@ -70,7 +70,7 @@ class DataProcessor():
 
         Args:
         test_size (float): The proportion of the dataset to include in the test split.
-        random_state (int): Percentage of data to split to evaluation set.
+        random_state (int): Seed for random shuffle before splitting.
 
         Returns:
         tuple: x_train, y_train, x_eval, y_eval, train_samples, train_labels, test_samples
