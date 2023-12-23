@@ -11,8 +11,8 @@ CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt/"
 TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/test"))
 
 
-NUM_EPOCHS = 100
-NUM_WORKERS = 11
+NUM_EPOCHS = 15
+NUM_WORKERS = 8
 BATCH_SIZE = 512
 
 FC_LR = [1e-3]
@@ -102,4 +102,26 @@ def save_last_ckpt_path(original_path):
                 f.writelines(["v = 0" + "\n",original_path+".ckpt"+"\n"])
                 f.truncate()
 
+from PIL import Image
+
+def manipola_immagine(immagine_path):
     
+    for image in os.listdir(immagine_path):
+        print(image)
+    # Carica l'immagine
+        img = Image.open(immagine_path/image)
+
+        # Estrai la barra di 12 pixel dal basso
+        barra = img.crop((0, 84, 96, 96))
+
+        # Flippa il resto dell'immagine
+        resto = img.crop((0, 0, 96, 84)).transpose(Image.FLIP_LEFT_RIGHT)
+
+        # Crea una nuova immagine con la barra inserita
+        nuova_immagine = Image.new("RGB", (96, 96))
+        nuova_immagine.paste(resto, (0, 0))
+        nuova_immagine.paste(barra, (0, 84))
+
+        # Salva l'immagine risultante
+        nuova_immagine.save(immagine_path/Path(image + "_augmented.png"))
+

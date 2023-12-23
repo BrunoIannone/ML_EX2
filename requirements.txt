@@ -1,12 +1,10 @@
-scikit-learn>=0.24.2
-termcolor>=1.1.0
-plotly>=5.5.0
-pandas>=2.1.3
-numpy>=1.26
-attrs>=23.1.0
-tensorboard>=2.15.1
-torch>=2.1.2
-torchvision>=0.16.2
-lightning>=2.1.2
-
-
+scikit-learn==0.24.2
+termcolor==1.1.0
+plotly==5.5.0
+pandas==1.3.3  # Assuming the latest version compatible with your environment
+numpy==1.21.2  # Assuming the latest version compatible with your environment
+attrs==21.2.0
+tensorboard==2.15.1
+torch==1.9.1  # Assuming the latest version compatible with your environment
+torchvision==0.10.1  # Assuming the latest version compatible with your environment
+lightning==1.3.8  # Assuming the latest version compatible with your environment

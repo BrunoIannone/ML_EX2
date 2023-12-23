@@ -53,8 +53,8 @@ class CarActionModel(pl.LightningModule):
         
         self.val_metric  = torchmetrics.F1Score(task="multiclass", num_classes=number_actions, average='micro')
         self.test_metric = torchmetrics.F1Score(task="multiclass", num_classes=number_actions, average='micro')
-        self.y_pred = torch.Tensor().cuda()
-        self.test_labels =torch.Tensor().cuda()
+        self.y_pred = torch.Tensor().to(utils.DEVICE)
+        self.test_labels =torch.Tensor().to(utils.DEVICE)
         self.save_hyperparameters()
 
     def forward(self, x):
@@ -66,7 +66,7 @@ class CarActionModel(pl.LightningModule):
         x = self.relu2(x)
         x = self.pool2(x)
         x = x.view(x.size(0), -1)
-        x = self.dropout(x)
+        #x = self.dropout(x)
         x = self.fc1(x)
         x = self.relu3(x)
         x = self.dropout(x)
@@ -153,14 +153,14 @@ class CarActionModel(pl.LightningModule):
         # plt.grid(False)
         # plt.savefig(str(utils.ROOT_FOOLDER)+"/Saves/conf_mat/"+str(datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S"))+".png",dpi = 100)
         #print(self.action_labels)
-        plot_confusion_matrix(self.test_labels.cpu().numpy(),self.y_pred.cpu().numpy(),"None",0,str(utils.ROOT_FOOLDER)+"/Saves/conf_mat/",False,True,self.action_names,self.action_labels)
+        plot_confusion_matrix(self.test_labels.cpu().numpy(),self.y_pred.cpu().numpy(),"Car action",0,str(utils.ROOT_FOOLDER)+"/Saves/conf_mat/",False,True,self.action_names,self.action_labels)
     def predict(self,to_predict):
         transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize((96, 96)),
             transforms.ToTensor()
         ])
-        to_predict = transform(to_predict).unsqueeze(0).cuda()
+        to_predict = transform(to_predict).unsqueeze(0).to(utils.DEVICE)
         
         p = self(to_predict)
         #print(np.argmax(p.detach()))
