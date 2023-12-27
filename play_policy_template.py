@@ -27,8 +27,8 @@ def play(env, model):
     
     done = False
     while not done:
-        
-        p = model.predict(obs) # adapt to your model     
+             
+        p = model.predict(obs[0:84, :, :]) # adapt to your model     
         obs, _, terminated, truncated, _ = env.step(p)
         #print("TRUNCATED",terminated)
         done = terminated or truncated
@@ -40,7 +40,9 @@ env_arguments = {
     'domain_randomize': False,
     'continuous': False,
     'render_mode': 'human',
-    #"max_episode_steps":3000
+    #"max_episode_steps":3000,
+    
+
 }
 
 env_name = 'CarRacing-v2'
@@ -55,7 +57,7 @@ path = None
 with open("last_ckpt.txt","r") as f:
         path = f.readline()
         path = f.readline().strip()
-model = CarActionModel.load_from_checkpoint(path,map_location=utils.DEVICE) # your trained model
+model = CarActionModel.load_from_checkpoint(path, map_location="cpu").eval().to("cpu") # your trained model
 model.eval()
 play(env, model)
 

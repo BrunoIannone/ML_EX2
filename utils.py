@@ -5,24 +5,23 @@ import csv
 import torch
 
 ROOT_FOOLDER = Path(os.path.dirname(__file__))
-TRAINING_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/train"))
+TRAINING_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/train"))
 LOG_SAVE_DIR_NAME = ROOT_FOOLDER/"Saves/logs/"
 CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt/"
-TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data" + "/test"))
+TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/test"))
 
 
-NUM_EPOCHS = 15
-NUM_WORKERS = 8
+NUM_EPOCHS =  [20]#[10, 20, 30]
+NUM_WORKERS = 11
 BATCH_SIZE = 512
 
-FC_LR = [1e-3]
-CNN_LR = [1e-4]
+FC_LR = [1e-3]#, 1e-4]#, 1e-5]
+CNN_LR = [1e-3]#, 1e-4]#, 1e-5]
 
-CNN_WD = [0.1]
-FC_WD = [0.1]
+CNN_WD = [0]#,0.01,0.1]
+FC_WD = [0]#,0.01,0.1]
 
-CNN_DROPOUT = [0.2]
-FC_DROPOUT = [0.2]
+FC_DROPOUT = [0.5]#, 0.6]
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -104,7 +103,7 @@ def save_last_ckpt_path(original_path):
 
 from PIL import Image
 
-def manipola_immagine(immagine_path):
+def manipola_immagine(immagine_path,augmentation_operation,dest):
     
     for image in os.listdir(immagine_path):
         print(image)
@@ -115,13 +114,17 @@ def manipola_immagine(immagine_path):
         barra = img.crop((0, 84, 96, 96))
 
         # Flippa il resto dell'immagine
-        resto = img.crop((0, 0, 96, 84)).transpose(Image.FLIP_LEFT_RIGHT)
+        resto = img.crop((0, 0, 96, 84))
+        for transformation, transformation_name in augmentation_operation:
+            resto_temp = resto
+            if transformation != None:
+                resto_temp = resto.transpose(transformation)
 
-        # Crea una nuova immagine con la barra inserita
-        nuova_immagine = Image.new("RGB", (96, 96))
-        nuova_immagine.paste(resto, (0, 0))
-        nuova_immagine.paste(barra, (0, 84))
+            # Crea una nuova immagine con la barra inserita
+            nuova_immagine = Image.new("RGB", (96, 84))
+            nuova_immagine.paste(resto_temp, (0, 0))
+            #nuova_immagine.paste(barra, (0, 84))
 
-        # Salva l'immagine risultante
-        nuova_immagine.save(immagine_path/Path(image + "_augmented.png"))
+            # Salva l'immagine risultante
+            nuova_immagine.save(dest/Path(image.split(".")[0] + transformation_name +".png"))
 

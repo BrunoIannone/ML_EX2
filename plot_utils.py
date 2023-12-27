@@ -1,5 +1,8 @@
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
 import pandas as pd
 import os
 import warnings
@@ -9,7 +12,7 @@ from typing import List
 from sklearn.decomposition import PCA
 import plotly.express as px
 
-def plot_confusion_matrix(y_true:np.ndarray, y_pred:np.ndarray, model_name:str,accuracy:float,plot_save_path:str,plot_show:bool,plot_save:bool,labels_name:List[str]=None,labels_list:List = None):
+def plot_confusion_matrix(y_true:np.ndarray, y_pred:np.ndarray, model_name:str,accuracy:float,plot_save_path:str,plot_show:bool,plot_save:bool,labels_name:List[str]=None,labels_list:List = None,cf_matrix_filename:str = ""):
     """
     Plot the confusion matrix for a classification model.
 
@@ -58,7 +61,7 @@ def plot_confusion_matrix(y_true:np.ndarray, y_pred:np.ndarray, model_name:str,a
     
     # Save the figure in the current working directory with 720p resolution
     if plot_save:
-        plt.savefig(os.path.join(plot_save_path, "confusion_matrix" + str(datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S"))), dpi=100)
+        plt.savefig(os.path.join(plot_save_path, "confusion_matrix" + cf_matrix_filename + str(datetime.datetime.now().strftime("%Y-%m-%d-%H_%M_%S")) + ".jpg"), dpi=100)
     if plot_show:
         plt.show()
     plt.clf()

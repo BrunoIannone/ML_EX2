@@ -1,6 +1,6 @@
 from load_data import load_data
 from sklearn.model_selection import train_test_split
-
+import time
 class DataProcessor():
     """
         Class that implements some methods for data processing
@@ -28,6 +28,7 @@ class DataProcessor():
 
         
         self.labels_name = self._extract_labels()
+        print(self.labels_name)
     
     def count_labels(self,labels_list):
         """
@@ -96,5 +97,5 @@ class DataProcessor():
                                                             random_state=random_state)
         
         
-
+        
         return x_train, y_train, x_eval, y_eval, train_samples, train_labels, test_samples, test_labels
