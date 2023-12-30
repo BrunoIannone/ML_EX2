@@ -3,6 +3,7 @@ from termcolor import colored
 from pathlib import Path
 import csv
 import torch
+import math
 
 ROOT_FOOLDER = Path(os.path.dirname(__file__))
 TRAINING_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/train"))
@@ -11,17 +12,43 @@ CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt/"
 TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/test"))
 
 
-NUM_EPOCHS =  [20]#[10, 20, 30]
+NUM_EPOCHS =  [100]
 NUM_WORKERS = 11
 BATCH_SIZE = 512
 
-FC_LR = [1e-3]#, 1e-4]#, 1e-5]
-CNN_LR = [1e-3]#, 1e-4]#, 1e-5]
+FC_LR = [1e-3]#, 1e-4, 1e-5]
+CNN_LR = [0]#, 1e-4]#, 1e-5]
 
 CNN_WD = [0]#,0.01,0.1]
 FC_WD = [0]#,0.01,0.1]
 
-FC_DROPOUT = [0.5]#, 0.6]
+FC_DROPOUT = [0.2,0.6,0.8]
+
+conv1_out_dim = [12]
+conv1_kernel_dim = [3,5,7]
+conv1_stride_dim = [1]
+
+POOL1_KERNEL_DIM = [3]
+POOL1_STRIDE_DIM = [2]
+
+
+conv2_out_dim = [24]
+conv2_kernel_dim = [3,5]
+conv2_stride_dim = [1]
+
+POOL2_KERNEL_DIM = [3]
+POOL2_STRIDE_DIM = [2]
+
+conv3_out_dim = [48]
+conv3_kernel_dim = [3,5]
+conv3_stride_dim = [2]
+
+POOL3_KERNEL_DIM = [3]
+POOL3_STRIDE_DIM = [2]
+
+
+
+
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -102,7 +129,9 @@ def save_last_ckpt_path(original_path):
                 f.truncate()
 
 from PIL import Image
-
+def convolution_output_dimension(input_dimension, kernel_size, padding, stride):
+    output_dimension = ((input_dimension - kernel_size + 2 * padding) // stride) + 1
+    return output_dimension
 def manipola_immagine(immagine_path,augmentation_operation,dest):
     
     for image in os.listdir(immagine_path):

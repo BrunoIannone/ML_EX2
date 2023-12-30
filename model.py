@@ -14,7 +14,8 @@ import datetime
 
 from plot_utils import plot_confusion_matrix
 class CarActionModel(pl.LightningModule): 
-    def __init__(self,  number_actions: int,action_names: List[str] = None, action_labels:List[int] = None,fc_lr: float = 0.0, cnn_lr: float = 0.0,fc_wd: float = 0.0, cnn_wd: float = 0.0, fc_dropout: float = 0.0, cf_matrix_filename: str = "") -> None:
+    def __init__(self,  number_actions: int,action_names: List[str] = None, action_labels:List[int] = None,fc_lr: float = 0.0, cnn_lr: float = 0.0,fc_wd: float = 0.0, cnn_wd: float = 0.0, fc_dropout: float = 0.0, cf_matrix_filename: str = "", 
+                 conv1_out_dim = 0,conv1_kernel_dim = 0, conv1_stride_dim = 0, pool1_kernel_dim = 0, pool1_stride_dim =0, conv2_out_dim = 0,conv2_kernel_dim = 0, conv2_stride_dim = 0, pool2_kernel_dim = 0, pool2_stride_dim =0,conv3_out_dim = 0,conv3_kernel_dim = 0, conv3_stride_dim = 0, pool3_kernel_dim = 0, pool3_stride_dim =0) -> None:
         """Car action model init function
 
         Args:
@@ -34,23 +35,38 @@ class CarActionModel(pl.LightningModule):
         self.action_labels = action_labels
         self.cf_matrix_filename = cf_matrix_filename
 
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(3, conv1_out_dim, kernel_size=conv1_kernel_dim, stride=conv1_stride_dim, padding=1)
+        
+        out = utils.convolution_output_dimension(96,conv1_kernel_dim,1,conv1_stride_dim)
+        #print(out)
         self.relu = nn.ReLU()
-        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.pool1 = nn.MaxPool2d(kernel_size=pool1_kernel_dim, stride=pool1_stride_dim)
+        out = utils.convolution_output_dimension(out,pool1_kernel_dim,0,pool1_stride_dim)
+        #print(out)
+        #print("ELLE")
+        
+        self.conv2 = nn.Conv2d(conv1_out_dim, conv2_out_dim, kernel_size=conv2_kernel_dim, stride=conv2_stride_dim, padding=1)
+        out = utils.convolution_output_dimension(out,conv2_kernel_dim,1,conv2_stride_dim)
+        #print(out)
+        self.pool2 = nn.MaxPool2d(kernel_size=pool2_kernel_dim, stride=pool2_stride_dim)
+        out = utils.convolution_output_dimension(out,pool2_kernel_dim,0,pool2_stride_dim)
+        #print(out)
 
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
-        #self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv3 = nn.Conv2d(conv2_out_dim, conv3_out_dim, kernel_size=conv3_kernel_dim, stride=conv3_stride_dim, padding=1)
+        out = utils.convolution_output_dimension(out,conv3_kernel_dim,1,conv3_stride_dim)
+        #print(out)
 
-        # self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
-        # self.pool3 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.pool3 = nn.MaxPool2d(kernel_size=pool3_kernel_dim, stride=pool3_stride_dim)
+        out = utils.convolution_output_dimension(out,pool3_kernel_dim,0,pool3_stride_dim)
+        #print(out)
 
         self.flatten = nn.Flatten()
-
+        
         # Fully connected layers for classification
-        self.fc1 = nn.Linear(36864, 128)
-        self.fc2 = nn.Linear(128, 5)
-        #self.fc3 = nn.Linear(250, 50)  # Adjust the output size to 5 for 5 classes
-        #self.fc4 = nn.Linear(100, 5)  # Adjust the output size to 5 for 5 classes
+        self.fc1 = nn.Linear(out*out*conv3_out_dim, out*out*conv3_out_dim//2)
+        self.fc2 = nn.Linear(out*out*conv3_out_dim//2, out*out*conv3_out_dim//2)
+        self.fc3 = nn.Linear(out*out*conv3_out_dim//2, 5)  # Adjust the output size to 5 for 5 classes
+        #self.fc4 = nn.Linear(2048, 5)  # Adjust the output size to 5 for 5 classes
 
         self.fc_dropout = nn.Dropout(fc_dropout)
 
@@ -69,41 +85,50 @@ class CarActionModel(pl.LightningModule):
         self.y_pred = None
         self.test_labels = None
         if self.training:
-            print("Ciao")
+            
             self.y_pred = torch.Tensor().to(utils.DEVICE)
             self.test_labels =torch.Tensor().to(utils.DEVICE)
             self.save_hyperparameters()
-        print(self.device)
+        
     def forward(self, x):
         #x = self.bn1(x)
 
         x = self.conv1(x)
+        #print("conv1",x.shape)
         x = self.relu(x)
         x = self.pool1(x)
-
-        x = self.conv2(x)
-        x = self.relu(x)
-        x = self.pool1(x)
+        #print("pool",x.shape)
         
-        # x = self.conv3(x)
-        # x = self.relu(x)
-        # x = self.pool3(x)
+        x = self.conv2(x)
+        #print("conv2",x.shape)
+        x = self.relu(x)
+        x = self.pool2(x)
+        #print("pool2",x.shape)
+       
+        x = self.conv3(x)
+        #print("conv3",x.shape)
+        #x = self.bn(x)
+        x = self.relu(x)
+        
+        x = self.pool3(x)
+        #print("pool3",x.shape)
+        #time.sleep(1000)
 
         # Flatten the output
         x = self.flatten(x)
-
+        
         # Fully connected layers for classification
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc_dropout(x)
         
         x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc_dropout(x)
+
+        x = self.fc3(x)
         #x = self.relu(x)
         #x = self.fc_dropout(x)
-
-        # x = self.fc3(x)
-        # x = self.relu(x)
-        # x = self.fc_dropout(x)
 
         #x = self.fc4(x)
 
@@ -112,7 +137,7 @@ class CarActionModel(pl.LightningModule):
 
     def configure_optimizers(self):
         
-        optimizer = torch.optim.Adam(self.parameters())
+        optimizer = torch.optim.Adam(self.parameters(),lr=self.fc_lr)
                
         return optimizer
     

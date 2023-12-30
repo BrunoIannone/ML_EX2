@@ -3,6 +3,8 @@ from model import CarActionModel
 import numpy as np
 from torch import unsqueeze, detach
 from torchvision.io import read_image
+from torchvision import transforms
+import time
 from PIL import Image
 import utils
 import torch
@@ -27,8 +29,18 @@ def play(env, model):
     
     done = False
     while not done:
-             
-        p = model.predict(obs[0:84, :, :]) # adapt to your model     
+        # transform = transforms.Compose([
+        #     transforms.ToPILImage(),
+        #     transforms.Resize((96, 96)),
+        #     transforms.ToTensor(),
+        #     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        # ])
+        #obs =   transform(obs)
+        #print(type(obs))
+        #time.sleep(1000)
+        obs = obs[0:84, :, :]
+        #obs = np.round((obs - obs.min()) / (obs.max() - obs.min()))
+        p = model.predict(obs) # adapt to your model     
         obs, _, terminated, truncated, _ = env.step(p)
         #print("TRUNCATED",terminated)
         done = terminated or truncated

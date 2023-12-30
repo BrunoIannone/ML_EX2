@@ -1,2 +1,2 @@
-v = 0
-/home/bruno/Desktop/ML_EX2/Saves/ckpt/0.001, 0, 0.5, 0.001, 0, 20test.ckpt
+v = 4
+/home/bruno/Desktop/ML_EX2/Saves/ckpt/0.001, 0, 0.2, 0, 0, 100test-v4.ckpt
