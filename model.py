@@ -11,7 +11,6 @@ import utils
 from torchvision import transforms
 import numpy as np
 import datetime
-
 from plot_utils import plot_confusion_matrix
 class CarActionModel(pl.LightningModule): 
     def __init__(self,  number_actions: int,action_names: List[str] = None, action_labels:List[int] = None,fc_lr: float = 0.0, cnn_lr: float = 0.0,fc_wd: float = 0.0, cnn_wd: float = 0.0, fc_dropout: float = 0.0, cf_matrix_filename: str = "", 
@@ -35,29 +34,36 @@ class CarActionModel(pl.LightningModule):
         self.action_labels = action_labels
         self.cf_matrix_filename = cf_matrix_filename
 
-        self.conv1 = nn.Conv2d(3, conv1_out_dim, kernel_size=conv1_kernel_dim, stride=conv1_stride_dim, padding=1)
+        conv1_pad = utils.calculate_padding(96,conv1_kernel_dim,conv1_stride_dim,None)
+        self.conv1 = nn.Conv2d(3, conv1_out_dim, kernel_size=conv1_kernel_dim, stride=conv1_stride_dim, padding=conv1_pad)
         
-        out = utils.convolution_output_dimension(96,conv1_kernel_dim,1,conv1_stride_dim)
+        out = utils.convolution_output_dimension(96,conv1_kernel_dim,conv1_pad,conv1_stride_dim)
         #print(out)
         self.relu = nn.ReLU()
-        self.pool1 = nn.MaxPool2d(kernel_size=pool1_kernel_dim, stride=pool1_stride_dim)
-        out = utils.convolution_output_dimension(out,pool1_kernel_dim,0,pool1_stride_dim)
+        pool1_pad = utils.calculate_padding(out,pool1_kernel_dim,pool1_stride_dim,None)
+        self.pool1 = nn.MaxPool2d(kernel_size=pool1_kernel_dim, stride=pool1_stride_dim,padding=pool1_pad)
+        out = utils.convolution_output_dimension(out,pool1_kernel_dim,pool1_pad,pool1_stride_dim)
         #print(out)
         #print("ELLE")
         
-        self.conv2 = nn.Conv2d(conv1_out_dim, conv2_out_dim, kernel_size=conv2_kernel_dim, stride=conv2_stride_dim, padding=1)
-        out = utils.convolution_output_dimension(out,conv2_kernel_dim,1,conv2_stride_dim)
+        conv2_pad = utils.calculate_padding(out,conv2_kernel_dim,conv2_stride_dim,None)
+        self.conv2 = nn.Conv2d(conv1_out_dim, conv2_out_dim, kernel_size=conv2_kernel_dim, stride=conv2_stride_dim, padding=conv2_pad)
+        out = utils.convolution_output_dimension(out,conv2_kernel_dim,conv2_pad,conv2_stride_dim)
         #print(out)
-        self.pool2 = nn.MaxPool2d(kernel_size=pool2_kernel_dim, stride=pool2_stride_dim)
-        out = utils.convolution_output_dimension(out,pool2_kernel_dim,0,pool2_stride_dim)
-        #print(out)
-
-        self.conv3 = nn.Conv2d(conv2_out_dim, conv3_out_dim, kernel_size=conv3_kernel_dim, stride=conv3_stride_dim, padding=1)
-        out = utils.convolution_output_dimension(out,conv3_kernel_dim,1,conv3_stride_dim)
+        pool2_pad = utils.calculate_padding(out,pool2_kernel_dim,pool2_stride_dim,None)
+        self.pool2 = nn.MaxPool2d(kernel_size=pool2_kernel_dim, stride=pool2_stride_dim,padding= pool2_pad)
+        out = utils.convolution_output_dimension(out,pool2_kernel_dim,pool2_pad,pool2_stride_dim)
         #print(out)
 
-        self.pool3 = nn.MaxPool2d(kernel_size=pool3_kernel_dim, stride=pool3_stride_dim)
-        out = utils.convolution_output_dimension(out,pool3_kernel_dim,0,pool3_stride_dim)
+        conv3_pad = utils.calculate_padding(out,conv3_kernel_dim,conv3_stride_dim,None)
+        
+        self.conv3 = nn.Conv2d(conv2_out_dim, conv3_out_dim, kernel_size=conv3_kernel_dim, stride=conv3_stride_dim, padding=conv3_pad)
+        out = utils.convolution_output_dimension(out,conv3_kernel_dim,conv3_pad,conv3_stride_dim)
+        #print(out)
+        pool3_pad = utils.calculate_padding(out,pool3_kernel_dim,pool3_stride_dim,None)
+        
+        self.pool3 = nn.MaxPool2d(kernel_size=pool3_kernel_dim, stride=pool3_stride_dim,padding=pool3_pad)
+        out = utils.convolution_output_dimension(out,pool3_kernel_dim,pool3_pad,pool3_stride_dim)
         #print(out)
 
         self.flatten = nn.Flatten()
@@ -84,11 +90,10 @@ class CarActionModel(pl.LightningModule):
         self.test_accuracy = torchmetrics.Accuracy(task = "multiclass", num_classes = number_actions)
         self.y_pred = None
         self.test_labels = None
-        if self.training:
-            
-            self.y_pred = torch.Tensor().to(utils.DEVICE)
-            self.test_labels =torch.Tensor().to(utils.DEVICE)
-            self.save_hyperparameters()
+        
+        self.y_pred = torch.Tensor().cuda()
+        self.test_labels =torch.Tensor().cuda()
+        self.save_hyperparameters()
         
     def forward(self, x):
         #x = self.bn1(x)
@@ -145,7 +150,7 @@ class CarActionModel(pl.LightningModule):
         image,labels = train_batch
         outputs = self(image)
         
-        loss = F.cross_entropy(outputs.view(-1, self.number_actions),labels,ignore_index=-100)
+        loss = F.cross_entropy(outputs,labels)
         
         self.log_dict({'train_loss':loss},on_epoch=True, batch_size=utils.BATCH_SIZE,on_step=False,prog_bar=True)
         
@@ -158,7 +163,7 @@ class CarActionModel(pl.LightningModule):
         y_pred = outputs.argmax(dim = 1)
        
        
-        loss = F.cross_entropy(outputs.view(-1, self.number_actions),labels,ignore_index=-100)
+        loss = F.cross_entropy(outputs,labels)
         
         self.val_f1(y_pred,labels)
         self.val_accuracy(y_pred,labels)
@@ -166,13 +171,14 @@ class CarActionModel(pl.LightningModule):
         self.log_dict({'val_loss':loss,'valid_f1': self.val_f1, 'valid_acc':self.val_accuracy },batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)
     
         
-    def test_step(self, test_batch,idx):
+    def test_step(self, test_batch):
         image, labels = test_batch
         outputs = self(image)
         y_pred = outputs.argmax(dim = 1)
-        self.y_pred=torch.cat((self.y_pred,y_pred),dim=0)
-        self.test_labels= torch.cat((self.test_labels,labels),dim=0)
-        loss = F.cross_entropy(outputs.view(-1, self.number_actions),labels,ignore_index=-100)
+        self.y_pred=torch.cat((self.y_pred,y_pred),dim=0).detach()
+        
+        self.test_labels= torch.cat((self.test_labels,labels),dim=0).detach()
+        loss = F.cross_entropy(outputs,labels)
         self.test_f1(y_pred,labels)
         self.test_accuracy(y_pred,labels)
         self.log_dict({'test_loss':loss,'test_f1': self.test_f1, 'test_acc':self.test_accuracy},batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)
@@ -180,7 +186,8 @@ class CarActionModel(pl.LightningModule):
     def on_test_end(self) -> None:
         
         plot_confusion_matrix(self.test_labels.cpu().numpy(),self.y_pred.cpu().numpy(),"Car action",0,str(utils.ROOT_FOOLDER)+"/Saves/conf_mat/",False,True,self.action_names,self.action_labels,cf_matrix_filename=self.cf_matrix_filename)
-    
+        del self.test_labels
+        del self.y_pred
     def predict(self,to_predict):
         transform = transforms.Compose([
             transforms.ToPILImage(),

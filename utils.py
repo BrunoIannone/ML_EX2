@@ -12,9 +12,9 @@ CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt/"
 TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/test"))
 
 
-NUM_EPOCHS =  [100]
-NUM_WORKERS = 11
-BATCH_SIZE = 512
+NUM_EPOCHS =  [3]
+NUM_WORKERS = 6
+BATCH_SIZE = 64
 
 FC_LR = [1e-3]#, 1e-4, 1e-5]
 CNN_LR = [0]#, 1e-4]#, 1e-5]
@@ -22,25 +22,25 @@ CNN_LR = [0]#, 1e-4]#, 1e-5]
 CNN_WD = [0]#,0.01,0.1]
 FC_WD = [0]#,0.01,0.1]
 
-FC_DROPOUT = [0.2,0.6,0.8]
+FC_DROPOUT = [0.2]#,0.6]
 
-conv1_out_dim = [12]
-conv1_kernel_dim = [3,5,7]
+conv1_out_dim = [12]#,24,36]
+conv1_kernel_dim = [3]#,5,7]
 conv1_stride_dim = [1]
 
 POOL1_KERNEL_DIM = [3]
-POOL1_STRIDE_DIM = [2]
+POOL1_STRIDE_DIM = [1]
 
 
-conv2_out_dim = [24]
-conv2_kernel_dim = [3,5]
+conv2_out_dim = [24]#,48]
+conv2_kernel_dim = [3]#,5]
 conv2_stride_dim = [1]
 
 POOL2_KERNEL_DIM = [3]
 POOL2_STRIDE_DIM = [2]
 
 conv3_out_dim = [48]
-conv3_kernel_dim = [3,5]
+conv3_kernel_dim = [3]#,5]
 conv3_stride_dim = [2]
 
 POOL3_KERNEL_DIM = [3]
@@ -132,6 +132,17 @@ from PIL import Image
 def convolution_output_dimension(input_dimension, kernel_size, padding, stride):
     output_dimension = ((input_dimension - kernel_size + 2 * padding) // stride) + 1
     return output_dimension
+
+def calculate_padding(input_size, filter_size, stride=1,output_size=None):
+    if output_size is None:
+        # Calculate padding based on the formula: P = (F - 1) / 2
+        padding = (filter_size - 1) // 2
+    else:
+        # Calculate padding to achieve a specific output size
+        padding = ((output_size - 1) * stride - input_size + filter_size) // 2
+
+    return padding
+
 def manipola_immagine(immagine_path,augmentation_operation,dest):
     
     for image in os.listdir(immagine_path):

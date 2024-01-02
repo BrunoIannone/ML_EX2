@@ -35,7 +35,7 @@ class CarActionDataModule(LightningDataModule):
             self.train_dataset,
             batch_size = utils.BATCH_SIZE,
             num_workers = utils.NUM_WORKERS,
-            shuffle = False,
+            shuffle = True,
             #collate_fn=utils.collate_fn
         ) 
     def val_dataloader(self):
