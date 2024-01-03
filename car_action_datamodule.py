@@ -2,13 +2,15 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 import car_action_dataset
 import utils
+from data_processor import DataProcessor
+
 
 class CarActionDataModule(LightningDataModule):
     """Datamodule for car action dataset.
 
     
     """
-    def __init__(self,training_data:dict, valid_data:dict, test_data:dict):
+    def __init__(self,training_path,test_path):#),training_data:dict, valid_data:dict, test_data:dict):
         """Init function for car action datamodule
 
         Args:
@@ -18,16 +20,23 @@ class CarActionDataModule(LightningDataModule):
         """
         super().__init__()
         
-        self.training_data = training_data
-        self.valid_data = valid_data
-        self.test_data = test_data
-        
+        #self.training_data = training_data
+        #self.valid_data = valid_data
+        #self.test_data = test_data
+        self.training_path = training_path
+        self.test_path = test_path
 
     def setup(self, stage: str):
+        data_processor = DataProcessor(self.training_path,self.test_path,0.3,0)
+        if stage == "fit":
+            self.train_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_train,data_processor.y_train)))
+            self.valid_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_eval,data_processor.y_eval)))
+
+        if stage == "validate":
+            self.valid_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_eval,data_processor.y_eval)))
         
-        self.train_dataset = car_action_dataset.CarActionDataset(self.training_data)
-        self.valid_dataset = car_action_dataset.CarActionDataset(self.valid_data)
-        self.test_dataset = car_action_dataset.CarActionDataset(self.test_data)
+        if stage == "test":
+            self.test_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.test_samples,data_processor.test_labels)))
 
     def train_dataloader(self):
         
@@ -54,3 +63,12 @@ class CarActionDataModule(LightningDataModule):
             shuffle = False,
             #collate_fn=utils.collate_fn
         )
+    
+    # def teardown(self, stage: str) -> None:
+    #     if stage == 'fit':
+    #         del self.train_dataset
+    #         del self.valid_dataset
+    #     elif stage == 'validate':
+    #         del self.valid_dataset
+    #     else:
+    #         del self.test_dataset

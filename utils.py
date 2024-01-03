@@ -12,9 +12,9 @@ CKPT_SAVE_DIR_NAME= ROOT_FOOLDER/"Saves/ckpt/"
 TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/test"))
 
 
-NUM_EPOCHS =  [3]
+NUM_EPOCHS =  [100]
 NUM_WORKERS = 6
-BATCH_SIZE = 64
+BATCH_SIZE = 256
 
 FC_LR = [1e-3]#, 1e-4, 1e-5]
 CNN_LR = [0]#, 1e-4]#, 1e-5]
@@ -22,25 +22,25 @@ CNN_LR = [0]#, 1e-4]#, 1e-5]
 CNN_WD = [0]#,0.01,0.1]
 FC_WD = [0]#,0.01,0.1]
 
-FC_DROPOUT = [0.2]#,0.6]
+FC_DROPOUT = [0.2]
 
-conv1_out_dim = [12]#,24,36]
-conv1_kernel_dim = [3]#,5,7]
+conv1_out_dim = [12,24,36]
+conv1_kernel_dim = [3,5,7]
 conv1_stride_dim = [1]
 
 POOL1_KERNEL_DIM = [3]
 POOL1_STRIDE_DIM = [1]
 
 
-conv2_out_dim = [24]#,48]
-conv2_kernel_dim = [3]#,5]
+conv2_out_dim = [96]
+conv2_kernel_dim = [3,5]
 conv2_stride_dim = [1]
 
 POOL2_KERNEL_DIM = [3]
 POOL2_STRIDE_DIM = [2]
 
-conv3_out_dim = [48]
-conv3_kernel_dim = [3]#,5]
+conv3_out_dim = [96]
+conv3_kernel_dim = [3,5]
 conv3_stride_dim = [2]
 
 POOL3_KERNEL_DIM = [3]

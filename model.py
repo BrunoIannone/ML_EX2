@@ -88,15 +88,16 @@ class CarActionModel(pl.LightningModule):
         
         self.test_f1 = torchmetrics.F1Score(task="multiclass", num_classes=number_actions, average='macro')
         self.test_accuracy = torchmetrics.Accuracy(task = "multiclass", num_classes = number_actions)
-        self.y_pred = None
-        self.test_labels = None
+        self.y_pred = torch.Tensor().cuda().detach()
+        self.test_labels = torch.Tensor().cuda().detach()
         
-        self.y_pred = torch.Tensor().cuda()
-        self.test_labels =torch.Tensor().cuda()
+        
         self.save_hyperparameters()
         
     def forward(self, x):
         #x = self.bn1(x)
+        #print(x.shape)
+        #time.sleep(100)
 
         x = self.conv1(x)
         #print("conv1",x.shape)
@@ -152,25 +153,26 @@ class CarActionModel(pl.LightningModule):
         
         loss = F.cross_entropy(outputs,labels)
         
-        self.log_dict({'train_loss':loss},on_epoch=True, batch_size=utils.BATCH_SIZE,on_step=False,prog_bar=True)
         
+
+        self.log_dict({'train_loss':loss},on_epoch=True, batch_size=utils.BATCH_SIZE,on_step=False,prog_bar=True,enable_graph=False)
         return loss
         
+    
 
     def validation_step(self, val_batch,idx):
         image, labels = val_batch
         outputs = self(image)
-        y_pred = outputs.argmax(dim = 1)
-       
-       
-        loss = F.cross_entropy(outputs,labels)
         
+        y_pred = outputs.argmax(dim = 1)
+        
+        loss = F.cross_entropy(outputs,labels)
         self.val_f1(y_pred,labels)
         self.val_accuracy(y_pred,labels)
+        self.log_dict({'val_loss':loss,'valid_f1': self.val_f1, 'valid_acc':self.val_accuracy },batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True,enable_graph=False)
         
-        self.log_dict({'val_loss':loss,'valid_f1': self.val_f1, 'valid_acc':self.val_accuracy },batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)
-    
         
+
     def test_step(self, test_batch):
         image, labels = test_batch
         outputs = self(image)
@@ -181,13 +183,14 @@ class CarActionModel(pl.LightningModule):
         loss = F.cross_entropy(outputs,labels)
         self.test_f1(y_pred,labels)
         self.test_accuracy(y_pred,labels)
-        self.log_dict({'test_loss':loss,'test_f1': self.test_f1, 'test_acc':self.test_accuracy},batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True)
+        
+        self.log_dict({'test_loss':loss,'test_f1': self.test_f1, 'test_acc':self.test_accuracy},batch_size=utils.BATCH_SIZE,on_epoch=True, on_step=False,prog_bar=True,enable_graph=False)
     
     def on_test_end(self) -> None:
         
         plot_confusion_matrix(self.test_labels.cpu().numpy(),self.y_pred.cpu().numpy(),"Car action",0,str(utils.ROOT_FOOLDER)+"/Saves/conf_mat/",False,True,self.action_names,self.action_labels,cf_matrix_filename=self.cf_matrix_filename)
-        del self.test_labels
         del self.y_pred
+        del self.test_labels
     def predict(self,to_predict):
         transform = transforms.Compose([
             transforms.ToPILImage(),

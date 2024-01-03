@@ -50,16 +50,17 @@ class CarActionDataset(Dataset):
             transforms.ToPILImage(),
             transforms.Resize((96, 96)),
             transforms.ToTensor(),
-            #transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                         
+                    #transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
         ])
-        image = transform(read_image(self.samples[index][0]))
+        image = transform(read_image(self.samples[index][0])).detach()
+        
         
         #print(colored(image.shape,"yellow"))
         # if self.transform:
         #     image = self.transform(image)
         # if self.target_transform:
         #     label = self.target_transform(label)
-        
         
         return image, self.samples[index][1]
     
