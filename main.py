@@ -13,9 +13,9 @@ import subprocess
 import threading
 import torch
 from pytorch_lightning.profilers import PyTorchProfiler
-
+import time
 import pytorch_lightning as pl
-
+import gc
 
 
 hyp_comb = list(product(utils.FC_LR, utils.FC_WD, utils.FC_DROPOUT, utils.CNN_LR,utils.CNN_WD,utils.NUM_EPOCHS,
@@ -98,25 +98,23 @@ for hyperparameter in tqdm.tqdm(hyp_comb,colour="yellow", desc="Tried combinatio
             f.write(str("Cuda",filename))
             f.close()
         continue
-    except MemoryError:
-        print(colored("CPU Out of memory detected, skipping","red"))
-
-        with open("oom.txt","a") as f:
-            f.write(str("CPU",filename))
-            f.close()
     
     print(colored("Starting testing...","green"))
    
     trainer.test(car_action_model,datamodule = car_action_datamodule)#,ckpt_path="best")
     
+    del car_action_datamodule
+    del trainer
+    del logger
+    del car_action_model
+    collected = gc.collect()
+    print(collected)
+    #time.sleep(10)
     #original_path = str(utils.CKPT_SAVE_DIR_NAME/str(filename))
 
     #utils.save_last_ckpt_path(original_path)
     #command_thread = threading.Thread(target=subprocess.Popen(['python', "play_policy_template.py"]))
-    # del car_action_datamodule
-    # del trainer
-    # del logger
-    # del car_action_model
+    
     
 subprocess.run(['bash',"alert.sh"])
 print(colored("Pipeline over","red"))

@@ -64,11 +64,11 @@ class CarActionDataModule(LightningDataModule):
             #collate_fn=utils.collate_fn
         )
     
-    # def teardown(self, stage: str) -> None:
-    #     if stage == 'fit':
-    #         del self.train_dataset
-    #         del self.valid_dataset
-    #     elif stage == 'validate':
-    #         del self.valid_dataset
-    #     else:
-    #         del self.test_dataset
+    def teardown(self, stage: str) -> None:
+        if stage == 'fit':
+            del self.train_dataset
+            del self.valid_dataset
+        elif stage == 'validate':
+            del self.valid_dataset
+        else:
+            del self.test_dataset

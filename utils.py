@@ -13,8 +13,8 @@ TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/t
 
 
 NUM_EPOCHS =  [100]
-NUM_WORKERS = 6
-BATCH_SIZE = 256
+NUM_WORKERS = 2
+BATCH_SIZE = 128
 
 FC_LR = [1e-3]#, 1e-4, 1e-5]
 CNN_LR = [0]#, 1e-4]#, 1e-5]
@@ -24,7 +24,7 @@ FC_WD = [0]#,0.01,0.1]
 
 FC_DROPOUT = [0.2]
 
-conv1_out_dim = [12,24,36]
+conv1_out_dim = [24,36,96]
 conv1_kernel_dim = [3,5,7]
 conv1_stride_dim = [1]
 
