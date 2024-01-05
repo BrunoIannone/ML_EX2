@@ -108,11 +108,8 @@ for hyperparameter in tqdm.tqdm(hyp_comb,colour="yellow", desc="Tried combinatio
     del logger
     del car_action_model
     collected = gc.collect()
-    print(collected)
-    #time.sleep(10)
-    #original_path = str(utils.CKPT_SAVE_DIR_NAME/str(filename))
-
-    #utils.save_last_ckpt_path(original_path)
+    
+    
     #command_thread = threading.Thread(target=subprocess.Popen(['python', "play_policy_template.py"]))
     
     

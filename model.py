@@ -191,6 +191,7 @@ class CarActionModel(pl.LightningModule):
         plot_confusion_matrix(self.test_labels.cpu().numpy(),self.y_pred.cpu().numpy(),"Car action",0,str(utils.ROOT_FOOLDER)+"/Saves/conf_mat/",False,True,self.action_names,self.action_labels,cf_matrix_filename=self.cf_matrix_filename)
         del self.y_pred
         del self.test_labels
+        
     def predict(self,to_predict):
         transform = transforms.Compose([
             transforms.ToPILImage(),

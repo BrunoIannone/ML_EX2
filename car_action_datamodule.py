@@ -10,7 +10,7 @@ class CarActionDataModule(LightningDataModule):
 
     
     """
-    def __init__(self,training_path,test_path):#),training_data:dict, valid_data:dict, test_data:dict):
+    def __init__(self,training_path,test_path):
         """Init function for car action datamodule
 
         Args:
@@ -20,9 +20,6 @@ class CarActionDataModule(LightningDataModule):
         """
         super().__init__()
         
-        #self.training_data = training_data
-        #self.valid_data = valid_data
-        #self.test_data = test_data
         self.training_path = training_path
         self.test_path = test_path
 
