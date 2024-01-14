@@ -26,14 +26,14 @@ class CarActionDataModule(LightningDataModule):
     def setup(self, stage: str):
         data_processor = DataProcessor(self.training_path,self.test_path,0.3,0)
         if stage == "fit":
-            self.train_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_train,data_processor.y_train)))
-            self.valid_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_eval,data_processor.y_eval)))
+            self.train_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_train,data_processor.y_train)),"train")
+            self.valid_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_eval,data_processor.y_eval)),"valid")
 
         if stage == "validate":
-            self.valid_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_eval,data_processor.y_eval)))
+            self.valid_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.x_eval,data_processor.y_eval)),"valid")
         
         if stage == "test":
-            self.test_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.test_samples,data_processor.test_labels)))
+            self.test_dataset = car_action_dataset.CarActionDataset(list(zip(data_processor.test_samples,data_processor.test_labels)),"test")
 
     def train_dataloader(self):
         
@@ -41,7 +41,7 @@ class CarActionDataModule(LightningDataModule):
             self.train_dataset,
             batch_size = utils.BATCH_SIZE,
             num_workers = utils.NUM_WORKERS,
-            shuffle = True,
+            shuffle = False,
             #collate_fn=utils.collate_fn
         ) 
     def val_dataloader(self):

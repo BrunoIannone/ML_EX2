@@ -1,6 +1,7 @@
 import utils
 import model
-
+import random
+random.seed(0)
 from itertools import product
 from car_action_datamodule import CarActionDataModule
 import tqdm
@@ -61,10 +62,10 @@ for hyperparameter in tqdm.tqdm(hyp_comb,colour="yellow", desc="Tried combinatio
     pool3_stride_dim = hyperparameter[20]
 
 
-    filename = str(conv1_out_dim) + ", " + str(conv1_kernel_dim) + ", "+ str(conv1_stride_dim) + ", "+ str(pool1_kernel_dim)+ ", "+ str(pool1_stride_dim) + ", " + str(conv2_out_dim) + ", " + str(conv2_kernel_dim) + ", "+ str(conv2_stride_dim) + ", "+ str(pool2_kernel_dim)+ ", "+ str(pool2_stride_dim) + ", "+str(conv3_out_dim) + ", " + str(conv3_kernel_dim) + ", "+ str(conv3_stride_dim) + ", "+ str(pool3_kernel_dim)+ ", "+ str(pool3_stride_dim) + ", " + str(fc_dropout) + "Stability test enlarging"
+    filename = str(conv1_out_dim) + ", " + str(conv1_kernel_dim) + ", "+ str(conv1_stride_dim) + ", "+ str(pool1_kernel_dim)+ ", "+ str(pool1_stride_dim) + ", " + str(conv2_out_dim) + ", " + str(conv2_kernel_dim) + ", "+ str(conv2_stride_dim) + ", "+ str(pool2_kernel_dim)+ ", "+ str(pool2_stride_dim) + ", "+str(conv3_out_dim) + ", " + str(conv3_kernel_dim) + ", "+ str(conv3_stride_dim) + ", "+ str(pool3_kernel_dim)+ ", "+ str(pool3_stride_dim) + ", " + str(fc_dropout)+ ", " + str(cnn_wd) + "model2_with_crop"
     print(filename)
     if(filename+".ckpt" in os.listdir(utils.CKPT_SAVE_DIR_NAME)):
-        print(colored("SKIPPO","red"))
+        print(colored("CKPT already found, skipping","red"))
         continue
     
     
@@ -92,11 +93,16 @@ for hyperparameter in tqdm.tqdm(hyp_comb,colour="yellow", desc="Tried combinatio
 
         trainer.fit(car_action_model,datamodule = car_action_datamodule)
         
-    except torch.cuda.OutOfMemoryError:
-        print(colored("Cuda Out of memory detected, skipping","red"))
-        with open("oom.txt","a") as f:
-            f.write(str("Cuda",filename))
+    except torch.cuda.OutOfMemoryError as e:
+        print((e,colored("Cuda Out of memory detected, skipping","red")))
+        with open("oom.txt ","a") as f:
+            f.write("Cuda" +filename+"\n")
             f.close()
+        del car_action_datamodule
+        del trainer
+        del logger
+        del car_action_model
+        collected = gc.collect()
         continue
     
     print(colored("Starting testing...","green"))

@@ -14,33 +14,33 @@ TEST_DIR_PATH = Path(os.path.join(os.path.dirname(__file__) + "/Data_crop" + "/t
 
 NUM_EPOCHS =  [100]
 NUM_WORKERS = 2
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 
 FC_LR = [1e-3]#, 1e-4, 1e-5]
 CNN_LR = [0]#, 1e-4]#, 1e-5]
 
-CNN_WD = [0]#,0.01,0.1]
+CNN_WD = [0.001]#,0.01,0.1]
 FC_WD = [0]#,0.01,0.1]
 
-FC_DROPOUT = [0.2]
+FC_DROPOUT = [0.4]
 
-conv1_out_dim = [24,36,96]
-conv1_kernel_dim = [3,5,7]
+conv1_out_dim = [6,12,24]
+conv1_kernel_dim = [3,5]
 conv1_stride_dim = [1]
 
 POOL1_KERNEL_DIM = [3]
 POOL1_STRIDE_DIM = [1]
 
 
-conv2_out_dim = [96]
+conv2_out_dim = [6,12,48]
 conv2_kernel_dim = [3,5]
 conv2_stride_dim = [1]
 
 POOL2_KERNEL_DIM = [3]
-POOL2_STRIDE_DIM = [2]
+POOL2_STRIDE_DIM = [1]
 
-conv3_out_dim = [96]
-conv3_kernel_dim = [3,5]
+conv3_out_dim = [24]
+conv3_kernel_dim = [3]
 conv3_stride_dim = [2]
 
 POOL3_KERNEL_DIM = [3]
@@ -52,15 +52,14 @@ POOL3_STRIDE_DIM = [2]
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-def build_couples(dir):  # training_folder, eval_folder, test_folder):
-    # Implement your logic to build front and rear couples here
-    """_summary_
+def build_couples(dir):
+   
+    """Build a csv with row sample_path, label (folder name)
 
     Args:
-        root_folder (str): _description_
+        dir (str): Dataset folder
 
-    Returns:
-        _type_: _description_
+    
     """
     # Get a list of all items (files and subfolders) in the root folder
     res = []
@@ -167,4 +166,5 @@ def manipola_immagine(immagine_path,augmentation_operation,dest):
 
             # Salva l'immagine risultante
             nuova_immagine.save(dest/Path(image.split(".")[0] + transformation_name +".png"))
+
 

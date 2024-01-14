@@ -5,12 +5,17 @@ from termcolor import colored
 from typing import List
 import time
 import os
-from torchvision import transforms
+from torchvision.transforms import v2
+import matplotlib.pyplot as plt
+import cv2
+import utils
+import numpy as np
+import torch
 
 class CarActionDataset(Dataset):
     """Car action dataset class
     """
-    def __init__(self, samples: List[tuple]):
+    def __init__(self, samples: List[tuple],stage:str):
         """Constructor for car action dataset
 
         Args:
@@ -19,8 +24,9 @@ class CarActionDataset(Dataset):
         """
         
         self.samples = samples 
+        self.stage = stage
         
-        #print(self.samples)
+        
         
         
     
@@ -32,7 +38,6 @@ class CarActionDataset(Dataset):
             int: length of samples list (number of samples)
         """
         return len(self.samples)
-
     def __getitem__(self, index: int):
         
         """Get item for dataloader input
@@ -44,13 +49,13 @@ class CarActionDataset(Dataset):
             tuple: (image, labels) open image_path and return the tuple (image,label) related to the index-th element 
         """
         
-        #convert index-th sample senses in indices
-        
-        transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((96, 96)),
-            transforms.ToTensor(),
-            #transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        #convert index-th sample senses in indices        
+        transform = v2.Compose([
+            
+            v2.Resize((96, 96),antialias=True),
+            v2.ToDtype(torch.float32, scale=True),
+
+            
         ])
         image = transform(read_image(self.samples[index][0]))
         
